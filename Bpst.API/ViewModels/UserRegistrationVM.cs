@@ -1,4 +1,6 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Swashbuckle.AspNetCore.Annotations;
+using System.ComponentModel.DataAnnotations;
 
 namespace Bpst.API.ViewModels
 {
@@ -25,9 +27,13 @@ namespace Bpst.API.ViewModels
         public string ConfirmPassword { get; set; } = string.Empty;
 
 
- 
+        [BindNever]
+
         public string ErrorMessage { get; set; } = string.Empty;
+        [BindNever]
         public string SuccessMessage { get; set; } = string.Empty;
+        [SwaggerSchema(ReadOnly = true)]
+
         public string NotificationMessage { get; set; } = string.Empty;
     }
 }

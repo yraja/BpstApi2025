@@ -1,10 +1,12 @@
 using Bpst.API.DB;
+using Bpst.API.Services.UserAccount;
 using Microsoft.EntityFrameworkCore; 
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
+builder.Services.AddScoped<IUserAccountService, UserAccountService>(); 
 builder.Services.AddControllers();
 builder.Services.AddDbContext<AppDbContext>(options =>
              options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConStr")));

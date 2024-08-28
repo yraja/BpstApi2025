@@ -40,7 +40,8 @@ namespace Bpst.API.Services.UserAccount
         }
         public async Task<bool> IfUserExists(string email)
         {
-            return await _context.AppUsers.AnyAsync(u => u.LoginEmail.Equals(email));
+            var user = await _context.AppUsers.AnyAsync(u => u.LoginEmail.Equals(email));
+            return user;
         }
         public async Task<User> GetUserByEmail(string email)
         {
@@ -54,7 +55,7 @@ namespace Bpst.API.Services.UserAccount
             }
             return null;
         }
-        public async Task<UserRegistrationResponse> RegisterNewUser(UserRegistrationVM user)
+        public async Task<UserRegistrationResponse> RegisterNewUserAsync(UserRegistrationVM user)
         {
             UserRegistrationResponse response = new UserRegistrationResponse() { };
 
@@ -70,12 +71,16 @@ namespace Bpst.API.Services.UserAccount
                     CreatedDate = DateTime.Now,
                     LoginEmail = user.Email,
                     PasswordHash = BCrypt.Net.BCrypt.HashPassword(user.Password),
+                    FirstName = user.FirstName,
+                    LastName = user.LastLame,
+                    Mobile = user.PhoneNumber,
+
                 };
                 _context.AppUsers.Add(appUser);
                 try
                 {
                     await _context.SaveChangesAsync();
-                    string msg = "Dear User,\r<br>\r<br>Welcome to MyHSE Portal.\r<br>\r<br>Please use below initial password to login into MyHSE Portal.\r<br>\r<br>" + user.Password + "\r<br>\r<br> <a href='http://myhseuat.sesb.com.my/auth/login'>MyHSE Portal</a> \r<br>\r<br>Please ensure to change password after initial login.\r<br>\r<br> \r<br>";
+                    string msg = "Dear User,\r<br>\r<br>Welcome    ... ";
                 }
                 catch (Exception ex)
                 {

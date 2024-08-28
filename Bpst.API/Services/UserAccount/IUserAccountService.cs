@@ -12,6 +12,6 @@ namespace Bpst.API.Services.UserAccount
         public Task<LoginResponse> Login(string LoginName, string Password);
         public Task<bool> IfUserExists(string email);
         public Task<User> GetUserByEmail(string email);
-        public Task<UserRegistrationResponse> RegisterNewUser(UserRegistrationVM user);
+        public Task<UserRegistrationResponse> RegisterNewUserAsync(UserRegistrationVM user);
     }
 }

@@ -2,6 +2,8 @@
 using Microsoft.EntityFrameworkCore;
 using Bpst.API.DB;
 using Bpst.API.DbModels;
+using Bpst.API.Services.UserAccount;
+using Bpst.API.ViewModels;
 
 namespace Bpst.API.Controllers.Account
 {
@@ -10,10 +12,12 @@ namespace Bpst.API.Controllers.Account
     public class UsersController : ControllerBase
     {
         private readonly AppDbContext _context;
+        private readonly IUserAccountService _userService;
 
-        public UsersController(AppDbContext context)
+        public UsersController(AppDbContext context, IUserAccountService userService)
         {
             _context = context;
+            _userService = userService;
         }
 
         // GET: api/Users
@@ -71,13 +75,10 @@ namespace Bpst.API.Controllers.Account
         // POST: api/Users
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<User>> PostUser(User user)
-        { 
-           // inject service ....
-            //    _context.AppUsers.Add(user);
-        //    await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetUser", new { id = user.UniqueId }, user);
+        public async Task<ActionResult<UserRegistrationResponse>> PostUser(UserRegistrationVM user)
+        {
+            var result = await _userService.RegisterNewUserAsync(user); 
+            return result;
         }
 
         // DELETE: api/Users/5
