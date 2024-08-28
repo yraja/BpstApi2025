@@ -15,5 +15,6 @@ namespace Bpst.API.DB
         }
 
         public DbSet<User> AppUsers { get; set; }
+        public DbSet<UserRole> UserRoles { get; set; }
     }
 }
