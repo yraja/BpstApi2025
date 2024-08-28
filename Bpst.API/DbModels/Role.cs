@@ -2,10 +2,11 @@
 
 namespace Bpst.API.DbModels
 {
-    public class UserRole
+    public class Role
     {
         [Key]
-        public int Id { get; set; }
+        [Display(Name = "Unique ID")] 
+        public int UniqueId { get; set; }
         public string RoleName { get; set; } = string.Empty;
     }
 }

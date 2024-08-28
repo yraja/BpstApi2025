@@ -18,7 +18,7 @@ namespace Bpst.API.DbModels
         [ReadOnly(true)]
         [NotMapped]
         public string FullName { get { return FirstName + " " + LastName; } }
-         
+
 
 
         [Required]
@@ -29,7 +29,9 @@ namespace Bpst.API.DbModels
 
         public string PasswordHash { get; internal set; } = string.Empty;
         public string Mobile { get; internal set; } = string.Empty;
-        public List<UserRole>? Roles { get; set; }
+
+        public List<Role>? Roles { get; set; }
+
 
         public DateTime CreatedDate { get; set; }
         public DateTime LastUpdatedDate { get; set; }

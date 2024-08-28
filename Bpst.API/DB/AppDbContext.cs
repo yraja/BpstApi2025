@@ -8,6 +8,7 @@ namespace Bpst.API.DB
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+            modelBuilder.SeedRoles();
         }
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -15,6 +16,7 @@ namespace Bpst.API.DB
         }
 
         public DbSet<User> AppUsers { get; set; }
+        public DbSet<Role> Roles { get; set; }
         public DbSet<UserRole> UserRoles { get; set; }
     }
 }

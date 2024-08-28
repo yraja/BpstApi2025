@@ -139,9 +139,15 @@ namespace Bpst.API.Services.UserAccount
             response.Token = await CreateJwtToken(loginName);
             response.userRoles = await GetUserRole(_appUser.LoginEmail);
         }
-        private async Task<List<UserRole>?> GetUserRole(string loginEmail)
+        private async Task<List<Role>?> GetUserRole(string loginEmail)
         {
-            return await _context.UserRoles.Where(r => r.RoleName.Equals(loginEmail)).ToListAsync();
+            var roles = await (from user in _context.AppUsers
+                               join userRole in _context.UserRoles on user.UniqueId equals userRole.UserId
+                               join role in _context.Roles on userRole.RoleId equals role.UniqueId
+                               where user.LoginEmail == loginEmail
+                               select role).ToListAsync();
+
+            return roles;
         }
     }
 }

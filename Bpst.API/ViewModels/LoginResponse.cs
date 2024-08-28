@@ -4,7 +4,7 @@ namespace Bpst.API.ViewModels
 {
     public class LoginResponse
     {
-        public List<UserRole>? userRoles; 
+        public List<Role>? userRoles; 
  
         public bool IsLoginSuccess { get; set; }
         public string Token { get; set; } = string.Empty;
