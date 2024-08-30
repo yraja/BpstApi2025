@@ -1,6 +1,7 @@
 ﻿using Bpst.API.DB;
 using Bpst.API.DbModels;
 using Bpst.API.ViewModels;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
@@ -12,32 +13,6 @@ namespace Bpst.API.Services.UserAccount
     {
         private readonly AppDbContext _context = context;
         private readonly IConfiguration _config = config;
-        public async Task<LoginResponse> Login(string LoginName, string Password)
-        {
-            LoginResponse response = new LoginResponse();
-
-            var _appUser = await GetUserByEmail(LoginName);
-            if (_appUser != null)
-            {
-
-                response = await ValidateCredentials(LoginName, Password);
-                if (response.IsLoginSuccess)
-                {
-                    await PopulateLoginResponse(response, LoginName);
-                }
-                else
-                {
-                    response.IsLoginSuccess = false;
-                    response.ErrorMessages ??= new List<string>() { };
-                    response.ErrorMessages.Add("Invalid Credentials");
-                    // response.ErrorMessages.Add("You entered a valid credentials but your user status is InActive, i.e. you are not allowed to login, please reach to admin");
-                    return response;
-                }
-            }
-
-            else response.ErrorMessages = new List<string>() { "User not Registerd in the Portal" };
-            return response;
-        }
         public async Task<bool> IfUserExists(string email)
         {
             var user = await _context.AppUsers.AnyAsync(u => u.LoginEmail.Equals(email));
@@ -154,5 +129,31 @@ namespace Bpst.API.Services.UserAccount
 
             return roles;
         }
+
+
+        public async Task<LoginResponse> Login(LoginVM login)
+        {
+            LoginResponse response = new LoginResponse();
+
+            var _appUser = await GetUserByEmail(login.LoginName);
+            if (_appUser != null)
+            {
+                response = await ValidateCredentials(login.LoginName, login.Password);
+                if (response.IsLoginSuccess)
+                {
+                    await PopulateLoginResponse(response, login.LoginName);
+                }
+                else
+                {
+                    response.IsLoginSuccess = false;
+                    response.ErrorMessages ??= [];
+                    response.ErrorMessages.Add("Invalid Credentials");
+                    return response;
+                }
+            }
+            else response.ErrorMessages = new List<string>() { "User not Registerd in the Portal" };
+            return response;
+        }
+
     }
 }

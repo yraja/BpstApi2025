@@ -1,5 +1,6 @@
 ﻿using Bpst.API.DbModels;
 using Bpst.API.ViewModels;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
@@ -9,9 +10,9 @@ namespace Bpst.API.Services.UserAccount
 {
     public interface IUserAccountService
     {
-        public Task<LoginResponse> Login(string LoginName, string Password);
         public Task<bool> IfUserExists(string email);
         public Task<User> GetUserByEmail(string email);
         public Task<UserRegistrationResponse> RegisterNewUserAsync(UserRegistrationVM user);
+        public Task<LoginResponse> Login(LoginVM login);
     }
 }
