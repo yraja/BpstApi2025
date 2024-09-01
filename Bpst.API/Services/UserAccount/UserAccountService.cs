@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 using System.Text;
 
 namespace Bpst.API.Services.UserAccount
@@ -32,7 +33,7 @@ namespace Bpst.API.Services.UserAccount
         }
         public async Task<UserRegistrationResponse> RegisterNewUserAsync(UserRegistrationVM user)
         {
-            UserRegistrationResponse response = new UserRegistrationResponse() { };
+            var response = new UserRegistrationResponse() { };
 
             if (await IfUserExists(user.Email))
             {
@@ -49,7 +50,7 @@ namespace Bpst.API.Services.UserAccount
                     FirstName = user.FirstName,
                     LastName = user.LastLame,
                     Mobile = user.PhoneNumber,
-
+                    Roles = user.Roles,
                 };
                 _context.AppUsers.Add(appUser);
                 try
@@ -72,32 +73,54 @@ namespace Bpst.API.Services.UserAccount
                 return response;
             }
         }
-        private async Task<string> CreateJwtToken(string email)
+        public async Task<LoginResponse> Login(LoginVM login)
         {
+            var response = new LoginResponse();
+            var _appUser = await GetUserByEmail(login.LoginName);
+            if (_appUser != null)
+            {
+                response = await ValidateCredentials(login.LoginName, login.Password);
+                if (response.IsLoginSuccess)
+                    await PopulateLoginResponse(response, login.LoginName);
+                else
+                {
+                    response.IsLoginSuccess = false;
+                    response.ErrorMessages ??= [];
+                    response.ErrorMessages.Add("Invalid Credentials");
+                    return response;
+                }
+            }
+            else response.ErrorMessages = ["User not Registerd in the Portal"];
+            return response;
+        }
+        public async Task<DefaultApiResponse> AddRoles(int userId, List<string> roles)
+        {
+            var result = new DefaultApiResponse() { };
+            var dbRoles = await _context.Roles.Where(r => roles.Contains(r.RoleName)).ToListAsync();
+            foreach (var role in dbRoles)
+                await _context.UserRoles.AddAsync(new UserRole() { UserId = userId, RoleId = role.UniqueId });
+            await _context.SaveChangesAsync();
+            result.IsSuccess = true;
+            result.SuccessMessages = new List<string>() { "Roles Are Saved Successfully" };
+            return result;
+        }
 
-            var secretKey = _config["JwtSettings:Key"];
-            var validIssuer = _config["JwtSettings:Issuer"];
-            var validAudience = _config["JwtSettings:Audience"];
+        private string CreateJwtToken(User _appUser)
+        {
+            var userClaims = _appUser.Roles?.Select(r => new Claim(ClaimTypes.Role, r)).ToList() ?? [];
 
-            var _appUser = await GetUserByEmail(email);
-            //var userClaims = _appUser.Roles.Split(",").Select(r => new Claim(ClaimTypes.Role, r)).ToList();
-            //userClaims.Add(new Claim(ClaimTypes.Name, _appUser.EMAILID));
-            //userClaims.Add(new Claim(ClaimTypes.Email, _appUser.EMAILID));
-            //userClaims.Add(new Claim(ClaimTypes.NameIdentifier, _appUser.Id.ToString()));
-            //userClaims.Add(new Claim(ClaimTypes.Sid, _appUser.Login));
+            userClaims.Add(new Claim(ClaimTypes.Name, _appUser.FullName));
+            userClaims.Add(new Claim(ClaimTypes.Email, _appUser.LoginEmail));
+            userClaims.Add(new Claim(ClaimTypes.NameIdentifier, _appUser.UniqueId.ToString()));
 
-            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["JwtSettings:Key"]));
-            var cred = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256Signature);
             var token = new JwtSecurityToken(
-                //   claims: userClaims,
-                expires: DateTime.Now.AddHours(2),
-                signingCredentials: cred,
-                issuer: validIssuer,
-                audience: validAudience
-                );
-
-            var jwt = new JwtSecurityTokenHandler().WriteToken(token);
-            return jwt;
+              claims: userClaims,
+              expires: DateTime.Now.AddHours(2),
+              signingCredentials: new SigningCredentials(new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["JwtSettings:Key"])), SecurityAlgorithms.HmacSha256Signature),
+              issuer: _config["JwtSettings:Issuer"],
+              audience: _config["JwtSettings:Audience"]
+              );
+            return new JwtSecurityTokenHandler().WriteToken(token);
         }
         private async Task<LoginResponse> ValidateCredentials(string email, string password)
         {
@@ -116,7 +139,7 @@ namespace Bpst.API.Services.UserAccount
             response.Email = _appUser.LoginEmail;
             response.Mobile = _appUser.Mobile;
             response.UserId = _appUser.UniqueId.ToString();
-            response.Token = await CreateJwtToken(loginName);
+            response.Token = CreateJwtToken(_appUser);
             response.userRoles = await GetUserRole(_appUser.LoginEmail);
         }
         private async Task<List<Role>?> GetUserRole(string loginEmail)
@@ -128,31 +151,6 @@ namespace Bpst.API.Services.UserAccount
                                select role).ToListAsync();
 
             return roles;
-        }
-
-
-        public async Task<LoginResponse> Login(LoginVM login)
-        {
-            LoginResponse response = new LoginResponse();
-
-            var _appUser = await GetUserByEmail(login.LoginName);
-            if (_appUser != null)
-            {
-                response = await ValidateCredentials(login.LoginName, login.Password);
-                if (response.IsLoginSuccess)
-                {
-                    await PopulateLoginResponse(response, login.LoginName);
-                }
-                else
-                {
-                    response.IsLoginSuccess = false;
-                    response.ErrorMessages ??= [];
-                    response.ErrorMessages.Add("Invalid Credentials");
-                    return response;
-                }
-            }
-            else response.ErrorMessages = new List<string>() { "User not Registerd in the Portal" };
-            return response;
         }
 
     }

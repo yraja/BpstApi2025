@@ -30,7 +30,7 @@ namespace Bpst.API.DbModels
         public string PasswordHash { get; internal set; } = string.Empty;
         public string Mobile { get; internal set; } = string.Empty;
 
-        public List<Role>? Roles { get; set; }
+        public List<string>? Roles { get; set; } = [];      
 
 
         public DateTime CreatedDate { get; set; }

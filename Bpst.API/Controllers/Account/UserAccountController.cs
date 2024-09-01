@@ -5,6 +5,7 @@ using Bpst.API.DbModels;
 using Bpst.API.Services.UserAccount;
 using Bpst.API.ViewModels;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages;
 
 namespace Bpst.API.Controllers.Account
 {
@@ -24,6 +25,7 @@ namespace Bpst.API.Controllers.Account
             return result;
         }
 
+
         [AllowAnonymous]
         [HttpPost("Login")]
         public async Task<ActionResult<LoginResponse>> Login(LoginVM login)
@@ -32,11 +34,12 @@ namespace Bpst.API.Controllers.Account
             return result;
         }
 
-        //   [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "SuperAdmin")]
         [HttpPost("AddRoles")]
-        public async Task<ActionResult<List<string>>> AddRoles(int userId, List<string> roles)
+        public async Task<ActionResult<DefaultApiResponse>> AddRoles(int userId, List<string> roles)
         {
-            return roles;
+            var result = await _userService.AddRoles(userId, roles);
+            return result;
         }
     }
 }

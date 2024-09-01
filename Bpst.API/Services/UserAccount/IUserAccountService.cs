@@ -14,5 +14,6 @@ namespace Bpst.API.Services.UserAccount
         public Task<User> GetUserByEmail(string email);
         public Task<UserRegistrationResponse> RegisterNewUserAsync(UserRegistrationVM user);
         public Task<LoginResponse> Login(LoginVM login);
+        public Task<DefaultApiResponse> AddRoles(int userId, List<string> roles);
     }
 }
