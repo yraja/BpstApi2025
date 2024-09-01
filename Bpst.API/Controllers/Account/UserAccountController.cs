@@ -6,6 +6,7 @@ using Bpst.API.Services.UserAccount;
 using Bpst.API.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages;
+using NuGet.Protocol.Plugins;
 
 namespace Bpst.API.Controllers.Account
 {
@@ -34,12 +35,20 @@ namespace Bpst.API.Controllers.Account
             return result;
         }
 
-        [Authorize(Roles = "SuperAdmin")]
-        [HttpPost("AddRoles")]
-        public async Task<ActionResult<DefaultApiResponse>> AddRoles(int userId, List<string> roles)
+
+        [Authorize]
+        [HttpPost("ChangeLoginEmail")]
+        public ActionResult<DefaultApiResponse> ChangeLoginEmail(string newEmail)
         {
-            var result = await _userService.AddRoles(userId, roles);
-            return result;
+            // ToDo, Validate user from existing token and update his login email to new one.
+            return null;
         }
+        [Authorize]
+        [HttpPost("ChangePassword")]
+        public ActionResult<DefaultApiResponse> ChangePassword(string oldPassword, string newPassword, string confirmPassword)
+        {
+            // ToDo, Validate user from existing token and update his password 
+            return null;
+        } 
     }
 }
